@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alkaff Fragrances - Toko Online</title>
+<style>
+:root{--g:#0f5d54;--s:#e7f2ef;--l:#dce7e4;--m:#5c726f;--r:#b34036}
+*{box-sizing:border-box}body{margin:0;background:#f3f7f5;color:#12312c;font:14px/1.45 "Segoe UI",Tahoma,sans-serif}
+header{background:var(--g);color:#fff;padding:12px 16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:1.1rem}
+button,input,select,textarea{font:inherit}input,select,textarea{width:100%;padding:10px;border:1px solid var(--l);border-radius:10px;background:#fff}
+.btn{border:0;border-radius:10px;background:var(--g);color:#fff;padding:10px 14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;text-align:center}
+.btn.alt{background:var(--s);color:#12312c}.btn.wa{background:#1a9e4f}.btn:disabled{opacity:.5}
+main{max-width:1000px;margin:0 auto;padding:14px}
+.bar{display:flex;gap:8px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.card{background:#fff;border:1px solid var(--l);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.card small{color:var(--m)}.card .p{font-weight:700;color:var(--g)}.card .btn{margin-top:auto}
+.tag{font-size:11px;background:var(--s);border-radius:8px;padding:1px 7px;align-self:flex-start}
+#dlg{max-width:520px;width:calc(100% - 20px);border:0;border-radius:14px;padding:16px;max-height:92vh}
+#dlg::backdrop{background:rgba(0,0,0,.4)}
+.ln{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--l)}
+.q button{width:28px;height:28px;border-radius:50%;border:1px solid var(--l);background:#fff;cursor:pointer}
+label{display:block;margin:10px 0 4px;font-weight:700}.err{color:var(--r);min-height:18px}
+.row{display:flex;gap:8px;margin-top:12px}.row .btn{flex:1}
+
+body{padding-bottom:84px}
+header{box-shadow:0 6px 18px rgba(15,93,84,.2)}
+header h1{line-height:1.2}header small{display:block;font-weight:400;opacity:.8;font-size:12px}
+.card{transition:box-shadow .15s,transform .1s}.card:hover{box-shadow:0 8px 20px rgba(17,43,36,.1);transform:translateY(-1px)}
+.card.out{opacity:.55}.card b{font-size:15px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(15,93,84,.15)}
+.empty{grid-column:1/-1;text-align:center;color:var(--m);padding:40px 10px}
+#open{position:fixed;left:12px;right:12px;bottom:12px;z-index:6;padding:14px;box-shadow:0 10px 26px rgba(0,0,0,.25);background:var(--g);color:#fff;font-size:15px}
+#open.has{display:block}
+@media(min-width:700px){#open{left:auto;right:20px;width:280px}}
+#dlg{box-shadow:0 20px 50px rgba(0,0,0,.3)}
+@media(max-width:600px){#dlg{margin:auto auto 0;border-radius:18px 18px 0 0;width:100%;max-width:none}input,select,textarea{font-size:16px}.bar{flex-direction:column}.bar select{max-width:none!important}}
+header .btn{padding:8px 12px;font-size:13px}
+</style></head><body>
+<header><h1><span id="ttl">Alkaff Fragrances</span><small>Toko online</small></h1><a class="btn wa" id="stat" target="_blank" rel="noopener" style="display:none;padding:8px 12px">Tanya via WhatsApp</a></header>
+<button class="btn" id="open">Keranjang (<span id="cnt">0</span>)<span id="tot"></span></button>
+<main>
+<div class="bar"><input id="q" placeholder="Cari produk atau brand"><select id="cat" style="max-width:190px"></select></div>
+<div class="grid" id="grid">Memuat katalog...</div>
+</main>
+<dialog id="dlg">
+<div id="form">
+<b style="font-size:1.1rem">Keranjang &amp; pemesanan</b>
+<div id="lines"></div>
+<div class="ln"><b>Subtotal</b><b id="sub"></b></div>
+<label>Nama</label><input id="nm" autocomplete="name">
+<label>No. WhatsApp</label><input id="ph" inputmode="tel" autocomplete="tel" placeholder="08xxxxxxxxxx">
+<label>Pengambilan</label><select id="ful"><option value="ambil">Ambil di toko</option><option value="kirim">Dikirim (ongkir dikonfirmasi toko via WhatsApp)</option></select>
+<div><label>Alamat pengiriman</label><textarea id="addr" rows="2"></textarea></div>
+<small style="display:block;margin-top:10px;color:var(--m)">Cara pembayaran dikonfirmasi toko setelah pesanan diterima.</small>
+<label>Catatan (opsional)</label><input id="note">
+<div class="err" id="err"></div>
+<div class="row"><button class="btn" id="send">Kirim pesanan</button></div>
+<div class="row"><button class="btn alt" id="close">Tutup</button></div>
+</div>
+<div id="done" style="display:none">
+<b style="font-size:1.1rem">Pesanan terkirim</b>
+<p>Nomor pesanan: <b id="no"></b><br>Total barang: <b id="doneTotal"></b> (belum termasuk ongkir bila dikirim).</p>
+<p>Toko akan menghubungi Anda untuk konfirmasi dan pembayaran.</p>
+<div class="row"><button class="btn" id="close2">Selesai</button></div>
+</div>
+</dialog>
+<script>
+// ISI SCRIPT_URL DAN WA SEBELUM DIPAKAI
+const CFG={
+  SCRIPT_URL:'',            // URL Apps Script berakhiran /exec (sama dengan di aplikasi kasir)
+  WA:'62',                  // nomor WhatsApp toko untuk pertanyaan pelanggan, format 62812xxxxxxx tanpa + atau 0 di depan
+  STORE:'Alkaff Fragrances'
+};
+const $=s=>document.querySelector(s),rp=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let items=[],cart={},REF='';
+try{const q=new URLSearchParams(location.search).get('ref');if(q){REF=q.toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,20);localStorage.setItem('ref',REF)}else REF=localStorage.getItem('ref')||''}catch(e){}
+const maxQ=()=>99;
+const prod=k=>items.find(p=>String(p.Kode)===k);
+const sub=()=>Object.entries(cart).reduce((a,[k,q])=>a+q*Number(prod(k).Harga),0);
+$('#ttl').textContent=CFG.STORE;
+async function load(){
+  if(!CFG.SCRIPT_URL){$('#grid').textContent='Toko belum dikonfigurasi (isi SCRIPT_URL di toko.html).';return}
+  try{
+    const d=await (await fetch(CFG.SCRIPT_URL+'?action=katalog')).json();
+    items=(d.items||[]).filter(p=>Number(p.Harga)>0);
+    const cats=[...new Set(items.map(p=>p.Kategori).filter(Boolean))];
+    $('#cat').innerHTML='<option value="">Semua kategori</option>'+cats.map(c=>'<option>'+esc(c)+'</option>').join('');
+    draw();
+  }catch(e){$('#grid').textContent='Gagal memuat katalog. Coba muat ulang halaman.'}
+}
+function draw(){
+  const q=$('#q').value.toLowerCase(),c=$('#cat').value;
+  const list=items.filter(p=>(!c||p.Kategori===c)&&(p.Produk+' '+p.Brand+' '+p.Kode).toLowerCase().includes(q));
+  $('#grid').innerHTML=list.map(p=>'<div class="card"><b>'+esc(p.Produk)+'</b><small>'+esc([p.Brand,p.Kategori].filter(Boolean).join(' · '))+'</small><span class="tag">'+esc(p.Tipe)+'</span><span class="p">'+rp(p.Harga)+'</span>'+'<button class="btn" data-add="'+esc(p.Kode)+'">Tambah</button>'+'</div>').join('')||'<div class="empty">Produk tidak ditemukan.</div>';
+}
+function drawCart(){
+  const e=Object.entries(cart);
+  $('#lines').innerHTML=e.map(([k,q])=>{const p=prod(k);return '<div class="ln"><span>'+esc(p.Produk)+'<br><small>'+rp(p.Harga)+'</small></span><span class="q"><button data-m="'+esc(k)+'">-</button> '+q+' <button data-p="'+esc(k)+'">+</button></span></div>'}).join('')||'Keranjang kosong.';
+  $('#sub').textContent=rp(sub());
+  $('#tot').textContent=e.length?' · '+rp(sub()):'';
+  $('#cnt').textContent=e.reduce((a,[,q])=>a+q,0);
+  $('#addr').parentElement.style.display=$('#ful').value==='kirim'?'block':'none';
+}
+function lastOrder(){try{return JSON.parse(localStorage.getItem('lastOrder')||'{}')}catch(e){return {}}}
+function setStatus(){
+  const a=$('#stat'),l=lastOrder(),ok=String(CFG.WA).replace(/\D/g,'').length>=9;
+  a.style.display=ok?'':'none';
+  a.href='https://wa.me/'+CFG.WA+'?text='+encodeURIComponent('Halo '+CFG.STORE+', saya ingin bertanya.'+(l.no?'\n(Pesanan terakhir saya: '+l.no+(l.name?' a.n. '+l.name:'')+')':''));
+}
+function valid(){
+  const e=$('#err');
+  if(!Object.keys(cart).length)return e.textContent='Keranjang kosong.',false;
+  if(!$('#nm').value.trim()||!/^[0-9+\s-]{8,16}$/.test($('#ph').value.trim()))return e.textContent='Isi nama dan nomor WhatsApp yang benar.',false;
+  if($('#ful').value==='kirim'&&!$('#addr').value.trim())return e.textContent='Isi alamat pengiriman.',false;
+  e.textContent='';return true;
+}
+async function send(){
+  if(!CFG.SCRIPT_URL||!valid())return;
+  const b=$('#send');b.disabled=true;b.textContent='Mengirim...';
+  try{
+    const body={action:'order',name:$('#nm').value.trim(),phone:$('#ph').value.trim(),ful:$('#ful').value,addr:$('#addr').value.trim(),pay:'wa',note:$('#note').value.trim(),ref:REF,items:Object.entries(cart).map(([k,q])=>({code:k,qty:q}))};
+    const d=await (await fetch(CFG.SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)})).json();
+    if(!d.ok)throw new Error(d.error);
+    $('#form').style.display='none';$('#done').style.display='block';
+    $('#no').textContent=d.no;$('#doneTotal').textContent=rp(d.total);
+    try{localStorage.setItem('lastOrder',JSON.stringify({no:d.no,name:$('#nm').value.trim()}))}catch(e){}
+    setStatus();
+    cart={};
+    load();
+  }catch(x){$('#err').textContent=x.message||'Gagal mengirim. Coba lagi sebentar lagi.'}
+  b.disabled=false;b.textContent='Kirim pesanan';
+}
+$('#grid').onclick=e=>{const k=e.target.dataset.add;if(!k)return;const p=prod(k);if((cart[k]||0)<maxQ(p))cart[k]=(cart[k]||0)+1;drawCart()};
+$('#lines').onclick=e=>{const m=e.target.dataset.m,a=e.target.dataset.p;
+  if(m){cart[m]--;if(cart[m]<1)delete cart[m]}
+  if(a&&cart[a]<maxQ(prod(a)))cart[a]++;
+  drawCart()};
+$('#open').onclick=()=>{$('#form').style.display='block';$('#done').style.display='none';drawCart();$('#dlg').showModal()};
+['#close','#close2'].forEach(s=>$(s).onclick=()=>$('#dlg').close());
+$('#q').oninput=draw;$('#cat').onchange=draw;$('#ful').onchange=drawCart;
+$('#send').onclick=send;
+setStatus();
+load();
+</script></body></html>
